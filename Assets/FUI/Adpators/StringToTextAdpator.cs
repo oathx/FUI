@@ -4,25 +4,25 @@ using System.Text;
 
 namespace FUI
 {
-    public class StringToTextAdpator : IAdpator<string>
+    public class StringToTextAdpator : IValueConverter<string>
     {
-        public void OnValueChanged(string oldValue, string newValue)
+        public void Convert(string value)
         {
             throw new NotImplementedException();
         }
     }
 
-    public class IntToTextAdpator : IAdpator<int>
+    public class IntToTextAdpator : IValueConverter<int>
     {
-        public void OnValueChanged(int oldValue, int newValue)
+        public void Convert(int value)
         {
 
         }
     }
 
-    public class FloatToTextAdpator : IAdpator<float>
+    public class FloatToTextAdpator : IValueConverter<float>
     {
-        public void OnValueChanged(float oldValue, float newValue)
+        public void Convert(float value)
         {
 
         }

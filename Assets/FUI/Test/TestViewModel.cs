@@ -4,15 +4,16 @@ using System.Text;
 
 namespace FUI.Test
 {
-    [Binding("TestView")]
-    public class TestViewModel : ViewModel
+    [Binding("SampleView")]
+    public class SampleViewModel : ViewModel
     {
         [Binding("testText", typeof(StringToTextAdpator))]
-        BindableProperty<string> name = new BindableProperty<string>("aaa");
+        string Name { get; set; }
 
-        public void Init()
+        public override void Initialize()
         {
-            name.Value = "bbb";
+            //Name = "aaaaa";
+            PropertyChanged(this, "Name");
         }
     }
 }

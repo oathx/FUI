@@ -22,7 +22,7 @@ namespace FUI.Test
                 var converterName = converterComponent.gameObject.name;
                 var converter = converterComponent as IValueConverter;
                 ulong converterId = ((ulong)converterName.GetHashCode()) << 32 | (uint)converter.GetType().GetHashCode();
-                this.convertes.Add(converterId, converter);
+                AddConverter(converterId, converter);
             }
 
             //bindingContext.PropertyChanged += this.Convert;

@@ -8,12 +8,11 @@ namespace FUI.Test
     public class SampleViewModel : ViewModel
     {
         [Binding("testText", typeof(StringToTextAdpator))]
-        string Name { get; set; }
+        public string Name { get; set; }
 
         public override void Initialize()
         {
-            //Name = "aaaaa";
-            PropertyChanged(this, "Name");
+            Name = "aaaa";
         }
     }
 }

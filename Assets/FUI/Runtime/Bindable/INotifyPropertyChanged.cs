@@ -4,6 +4,6 @@ namespace FUI.Bindable
 {
     public interface INotifyPropertyChanged
     {
-        Action<object, string> PropertyChanged { set; }
+        Action<object, string> PropertyChanged { get; set; }
     }
 }

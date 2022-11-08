@@ -1,16 +1,20 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FUI.Bindable;
+﻿using System.Collections.Generic;
 
 namespace FUI
 {
     public class View
     {
         internal Dictionary<ulong, IValueConverter> convertes;
+
+        public void AddConverter(ulong id, IValueConverter converter)
+        {
+            convertes[id] = converter;
+        }
+
+        public void RemoveConverter(ulong id)
+        {
+            convertes.Remove(id);
+        }
 
         internal void Convert(object sender, string propertyName)
         {

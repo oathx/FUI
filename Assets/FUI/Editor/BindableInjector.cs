@@ -1,8 +1,9 @@
-﻿using Mono.Cecil;
+﻿using FUI.Bindable;
+
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-using System;
-using System.Collections.Generic;
+using System.Reflection;
 
 namespace FUI.Editor
 {
@@ -13,32 +14,20 @@ namespace FUI.Editor
         {
             //TODO 只加载目标dll  依赖的dll通过module.refrenceassemblies 来加载
             const string dllPath = "./Library/ScriptAssemblies/FUI.Test.dll";
-            //List<string> refrences = new List<string>
-            //{
-            //    "./Library/ScriptAssemblies/FUI.Runtime.dll"
-            //};
-            const string propertyChangedHandlerName = "PropertyChanged";
-            //refrences.Add(dllPath);
-            var modules = LoadModules(new List<string> { dllPath});
-            InjectPropertyChanged(modules, dllPath, propertyChangedHandlerName);
+            const string propertyChangedMethodName = "OnPropertyChanged";
+            InjectPropertyChanged(dllPath, propertyChangedMethodName);
         }
 
-        static List<ModuleDefinition> LoadModules(List<string> dlls)
+        /// <summary>
+        /// 注入属性更改通知方法
+        /// </summary>
+        /// <param name="dllPath"></param>
+        /// <param name="propertyChangedMethodName"></param>
+        static void InjectPropertyChanged(string dllPath, string propertyChangedMethodName)
         {
-            var modules = new List<ModuleDefinition>();
-            foreach(var dll in dlls)
+            var assembly = AssemblyDefinition.ReadAssembly(dllPath);
+            foreach(var type in assembly.MainModule.Types)
             {
-                var module = ModuleDefinition.ReadModule(dll);
-                modules.Add(module);
-            }
-            return modules;
-        }
-
-        static void InjectPropertyChanged(List<ModuleDefinition> modules, string dllPath, string propertyChangedHandlerName)
-        {
-            foreach(var type in modules[0].Types)
-            {
-                UnityEngine.Debug.Log(type);
                 foreach (var property in type.Properties)
                 {
                     if (!property.HasCustomAttribute<BindingAttribute>())
@@ -46,23 +35,22 @@ namespace FUI.Editor
                         continue;
                     }
 
-                    InjectPropertySetMethod(modules[0], type, property, propertyChangedHandlerName);
+                    InjectPropertyChangedMethod(assembly.MainModule, property, propertyChangedMethodName);
                 }
             }
-                //assembly.Write(dllPath, new WriterParameters { WriteSymbols = true });
+            assembly.Write(dllPath, new WriterParameters { WriteSymbols = true });
+            UnityEngine.Debug.Log($"inject PropertyChanged complete");
         }
 
-        static void InjectPropertySetMethod(ModuleDefinition module, TypeDefinition type, PropertyDefinition property, string propertyChangedHandlerName)
+        static void InjectPropertyChangedMethod(ModuleDefinition module, PropertyDefinition property, string propertyChangedMethodName)
         {
-            var actionMethod = module.ImportReference(typeof(Action<object, string>).GetMethod("Invoke", new[] { typeof(object), typeof(string) }));
+            var flag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
+            var propertyChangedMethod = module.ImportReference(typeof(ObservableObject).GetMethod(propertyChangedMethodName, flag));
             var injector = new Injector(property.SetMethod, 2);
             injector.InsertAfter(OpCodes.Ldarg_0);
-            injector.InsertAfter(OpCodes.Call, type.GetProperty(propertyChangedHandlerName).GetMethod);
-            injector.InsertAfter(OpCodes.Ldarg_0);
             injector.InsertAfter(OpCodes.Ldstr, property.Name);
-            injector.InsertAfter(OpCodes.Callvirt, actionMethod);
+            injector.InsertAfter(OpCodes.Call, propertyChangedMethod);
             injector.OffsetMethod();
-            UnityEngine.Debug.Log($"inject PropertyChanged complete");
         }
     }
 }

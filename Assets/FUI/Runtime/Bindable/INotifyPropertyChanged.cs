@@ -2,8 +2,9 @@
 
 namespace FUI.Bindable
 {
+    public delegate void PropertyChangedHandler(object sender, string propertyName);
     public interface INotifyPropertyChanged
     {
-        Action<object, string> PropertyChanged { get; set; }
+        event PropertyChangedHandler PropertyChanged;
     }
 }

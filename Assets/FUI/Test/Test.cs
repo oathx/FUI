@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+
 using UnityEngine;
 
 namespace FUI.Test
@@ -11,16 +9,26 @@ namespace FUI.Test
     {
         void Awake()
         {
-            var vm = new SampleViewModel();
-            vm.PropertyChanged += OnPropertyChanged;
-            vm.Name = "testName";
-            vm.Initialize();
-            vm.Name = "testName2";
+            OpenView<TestViewGenerated>();
         }
 
-        void OnPropertyChanged(object sender, string propertyName)
+        async void OpenView<T>() where T : View
         {
-            UnityEngine.Debug.Log($"OnPropertyChanged  propertyName:{propertyName}  sender:{sender}");
+            var vm = new SampleViewModel();
+            var view = Activator.CreateInstance(typeof(T), vm);
+            vm.Name = "test1Name";
+            vm.ID = 1;
+            vm.Age = 10;
+
+            await Task.Delay(1000);
+            vm.Name = "test2Naame";
+            vm.ID = 2;
+            vm.Age = 20;
+
+            await Task.Delay(1000);
+            vm.Name = "test3Name";
+            vm.ID = 3;
+            vm.Age = 30;
         }
     }
 }

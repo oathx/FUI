@@ -4,6 +4,16 @@ namespace FUI.Bindable
 {
     public class ObservableObject : INotifyPropertyChanged
     {
-        public Action<object, string> PropertyChanged { get; set; }
+        public event PropertyChangedHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, propertyName);
+        }
+
+        public T GetValue<T>()
+        {
+            return default;
+        }
     }
 }

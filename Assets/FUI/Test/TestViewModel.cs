@@ -1,18 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using FUI.UGUI.ValueConverter;
 
 namespace FUI.Test
 {
     [Binding("SampleView")]
     public class SampleViewModel : ViewModel
     {
-        [Binding("testText", typeof(StringToTextAdpator))]
+        [Binding]
         public string Name { get; set; }
+
+        [Binding]
+        public int ID { get; set; }
+
+        [Binding]
+        public int Age { get; set; }
 
         public override void Initialize()
         {
-            Name = "aaaa";
+            Name = "aaaaa";
+        }
+
+        public string GetName()
+        {
+            return Name;
         }
     }
 }

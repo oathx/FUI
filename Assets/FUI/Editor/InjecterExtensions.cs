@@ -15,26 +15,7 @@ namespace FUI.Editor
         /// <returns></returns>
         public static PropertyDefinition GetProperty(this TypeDefinition type, string propertyName)
         {
-            UnityEngine.Debug.Log($"GetProperty  type:{type}  propertyName:{propertyName}");
-            var property = type.Properties.FirstOrDefault(p => p.Name == propertyName);
-            if(property != null)
-            {
-                return property;
-            }
-            
-            if(type.BaseType == null)
-            {
-                return null;
-            }
-            UnityEngine.Debug.Log($"baseModule:{type.BaseType.Module.Assembly}");
-            UnityEngine.Debug.Log($"baseTypeName:{type.BaseType.FullName}");
-            foreach(var t in type.BaseType.Module.Types)
-            {
-                UnityEngine.Debug.Log(t);
-            }
-            var baseType = type.BaseType.Resolve();// type.BaseType.Module.GetType(type.BaseType.FullName);
-            UnityEngine.Debug.Log($"baseType:{baseType}");
-            return GetProperty(baseType, propertyName);
+            return type.Properties.FirstOrDefault(p => p.Name == propertyName);
         }
 
         /// <summary>

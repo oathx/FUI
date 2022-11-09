@@ -17,7 +17,8 @@ namespace FUI.Test
             AddValueConverter();
         }
 
-        public void AddValueConverter()
+        //TODO 后续将公用部分提成基类 UGUIView
+        void AddValueConverter()
         {
             //TODO  这个配置到时候直接在prefab上操作 序列化到prefab里面
             var config = new System.Collections.Generic.Dictionary<string, string>()
@@ -25,7 +26,8 @@ namespace FUI.Test
                 {"txt_Name", "Name" },
                 {"txt_ID", "ID" },
                 {"txt_Age", "Age" },
-                {"img_Icon", "ID" }
+                {"img_Icon", "ID" },
+                {"btn_submit", "Submit" }
             };
 
             foreach(var item in gameObject.transform.GetComponentsInChildren<Transform>(true))
@@ -43,7 +45,7 @@ namespace FUI.Test
 
         protected override void OnPropertyChanged(object sender, string propertyName)
         {
-            //TODO  这个地方存在拆装箱和反射调用  后续优化
+            //TODO  这个地方存在拆装箱和反射调用  后续考虑通过rosyln注入代码解决
             switch (propertyName)
             {
                 case "Name":
@@ -57,6 +59,11 @@ namespace FUI.Test
                 case "Age":
                     var age = GetValue<int>(propertyName);
                     Convert(propertyName, age);
+                    break;
+                case "Submit":
+                    UnityEngine.Debug.Log($"OnPropertyChanged:{propertyName}  value:{GetValue<System.Action>(propertyName)}");
+                    var submit = GetValue<System.Action>(propertyName);
+                    Convert(propertyName, submit);
                     break;
             }
         }

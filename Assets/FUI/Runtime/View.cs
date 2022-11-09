@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using FUI.Bindable;
+
 namespace FUI
 {
     public abstract class View
@@ -7,7 +9,7 @@ namespace FUI
         /// <summary>
         /// 当前绑定的上下文
         /// </summary>
-        protected readonly ViewModel bindingContext;
+        protected readonly ObservableObject bindingContext;
 
         /// <summary>
         /// 所有的值转换器
@@ -18,7 +20,7 @@ namespace FUI
         /// 通过一个上下文初始化这个View
         /// </summary>
         /// <param name="bindingContext">绑定的上下文</param>
-        public View(ViewModel bindingContext)
+        public View(ObservableObject bindingContext)
         {
             convertes = new Dictionary<string, List<IValueConverter>>();
             this.bindingContext = bindingContext;

@@ -1,5 +1,5 @@
 ﻿
-using FUI.UGUI.ValueConverter;
+using System;
 
 namespace FUI.Test
 {
@@ -15,14 +15,20 @@ namespace FUI.Test
         [Binding]
         public int Age { get; set; }
 
+        [Binding]
+        Action Submit { get; set; }
+
         public override void Initialize()
         {
-            Name = "aaaaa";
+            Name = "Test";
+            ID = 0;
+            Age = 0;
+            Submit = OnSubmit;
         }
 
-        public string GetName()
+        void OnSubmit()
         {
-            return Name;
+            UnityEngine.Debug.Log("ClickBtn....");
         }
     }
 }

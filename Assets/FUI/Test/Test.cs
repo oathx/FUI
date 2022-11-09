@@ -16,6 +16,9 @@ namespace FUI.Test
         {
             var vm = new SampleViewModel();
             var view = Activator.CreateInstance(typeof(T), vm);
+
+            vm.Initialize();
+
             vm.Name = "test1Name";
             vm.ID = 1;
             vm.Age = 10;

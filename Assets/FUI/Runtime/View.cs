@@ -9,22 +9,28 @@ namespace FUI
         /// <summary>
         /// 当前绑定的上下文
         /// </summary>
-        protected readonly ObservableObject bindingContext;
+        protected ObservableObject BindingContext { get; private set; }
 
         /// <summary>
-        /// 所有的值转换器
+        /// 所有的视觉元素
         /// </summary>
-        Dictionary<string, List<IValueConverter>> convertes;
+        Dictionary<string, List<IVisualElement>> visualElements;
+
+        /// <summary>
+        /// 初始化这个View
+        /// </summary>
+        public View()
+        {
+            visualElements = new Dictionary<string, List<IVisualElement>>();
+        }
 
         /// <summary>
         /// 通过一个上下文初始化这个View
         /// </summary>
-        /// <param name="bindingContext">绑定的上下文</param>
-        public View(ObservableObject bindingContext)
+        /// <param name="bindingContext"></param>
+        public View(ObservableObject bindingContext):this()
         {
-            convertes = new Dictionary<string, List<IValueConverter>>();
-            this.bindingContext = bindingContext;
-            this.bindingContext.PropertyChanged += OnPropertyChanged;
+            Binding(bindingContext);
         }
 
         /// <summary>
@@ -35,20 +41,55 @@ namespace FUI
         protected abstract void OnPropertyChanged(object sender, string propertyName);
 
         /// <summary>
+        /// 绑定一个上下文
+        /// </summary>
+        /// <param name="bindingContext"></param>
+        /// <exception cref="System.Exception"></exception>
+        public void Binding(ObservableObject bindingContext)
+        {
+            if(this.BindingContext != null)
+            {
+                throw new System.Exception("bindingContext not null, you must unbinding before binding");
+            }
+
+            if(bindingContext == null)
+            {
+                throw new System.Exception("binding error, bindingContext is null");
+            }
+
+            this.BindingContext = bindingContext;
+            this.BindingContext.PropertyChanged += OnPropertyChanged;
+        }
+
+        /// <summary>
+        /// 解绑上下文
+        /// </summary>
+        public void Unbinding()
+        {
+            if(this.BindingContext == null)
+            {
+                return;
+            }
+
+            this.BindingContext.PropertyChanged -= OnPropertyChanged;
+            this.BindingContext = null;
+        }
+
+        /// <summary>
         /// 添加一个值转换器
         /// </summary>
         /// <param name="propertyName">要转换的属性名</param>
         /// <param name="converter">转换器</param>
-        protected void AddConverter(string propertyName, IValueConverter converter)
+        protected void AddVisualElement(string propertyName, IVisualElement visualElement)
         {
-            if(!convertes.TryGetValue(propertyName, out var converterList))
+            if(!visualElements.TryGetValue(propertyName, out var elementList))
             {
-                converterList = new List<IValueConverter> { converter };
-                convertes[propertyName] = converterList;
+                elementList = new List<IVisualElement> { visualElement };
+                visualElements[propertyName] = elementList;
             }
             else
             {
-                converterList.Add(converter);
+                elementList.Add(visualElement);
             }
         }
 
@@ -57,56 +98,56 @@ namespace FUI
         /// </summary>
         /// <param name="propertyName">转换的属性名</param>
         /// <param name="converter">转换器</param>
-        protected void RemoveConverter(string propertyName, IValueConverter converter)
+        protected void RemoveVisualElement(string propertyName, IVisualElement visualElement)
         {
-            if(!convertes.TryGetValue(propertyName, out var converterList))
+            if(!visualElements.TryGetValue(propertyName, out var elementList))
             {
                 return;
             }
 
-            if (converterList.Contains(converter))
+            if (elementList.Contains(visualElement))
             {
-                converterList.Remove(converter);
+                elementList.Remove(visualElement);
             }
         }
 
         /// <summary>
-        /// 移除一个值的所有转换器
+        /// 移除一个值所绑定的视觉元素
         /// </summary>
         /// <param name="propertyName">转换的属性名</param>
-        protected void RemoveConverter(string propertyName)
+        protected void RemoveVisualElement(string propertyName)
         {
-            if(!convertes.TryGetValue(propertyName, out _))
+            if(!visualElements.TryGetValue(propertyName, out _))
             {
                 return;
             }
-            convertes.Remove(propertyName);
+            visualElements.Remove(propertyName);
         }
 
         /// <summary>
-        /// 移除所有的值转换器
+        /// 移除所有的视觉元素
         /// </summary>
-        protected void RemoveConverter()
+        protected void RemoveVisualElements()
         {
-            convertes.Clear();
+            visualElements.Clear();
         }
 
         /// <summary>
-        /// 将一个绑定的属性转换成对应的效果
+        /// 将一个绑定的属性应用到对应的视觉元素
         /// </summary>
         /// <typeparam name="T">值类型</typeparam>
         /// <param name="propertyName">绑定的属性名</param>
         /// <param name="value">绑定的属性值</param>
-        protected void Convert<T>(string propertyName, T value)
+        protected void PropertyChanged<T>(string propertyName, T value)
         {
-            if(!convertes.TryGetValue(propertyName, out var converterList))
+            if(!visualElements.TryGetValue(propertyName, out var elements))
             {
                 return;
             }
 
-            foreach(var converter in converterList)
+            foreach(var element in elements)
             {
-                (converter as IValueConverter<T>).Convert(value);
+                (element as IVisualElement<T>).OnValueChanged(value);
             }
         }
     }

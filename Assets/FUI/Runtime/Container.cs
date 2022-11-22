@@ -42,9 +42,9 @@ namespace FUI
         /// <summary>
         /// 打开这个组件
         /// </summary>
-        internal void Open()
+        internal void Open(object param)
         {
-
+            ViewModel.OnOpen(param);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace FUI
         /// </summary>
         internal void Close()
         {
-
+            ViewModel.OnClose();
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace FUI
         /// </summary>
         internal void Destroy()
         {
-
+            
         }
     }
 
@@ -69,14 +69,17 @@ namespace FUI
     /// </summary>
     internal class Container
     {
+        public string Name { get; private set; }
+
         /// <summary>
         /// 组成这个界面的所有组件
         /// </summary>
         List<Component> components;
 
-        internal Container()
+        internal Container(string name)
         {
             components = new List<Component>();
+            this.Name = name;
         }
 
         /// <summary>
@@ -84,10 +87,9 @@ namespace FUI
         /// </summary>
         /// <param name="view">这个组件所对应的View</param>
         /// <param name="viewModel">这个组件所对应的ViewModel</param>
-        internal Container(View view, ViewModel viewModel)
+        internal Container(string name, View view, ViewModel viewModel) : this(name)
         {
             var component = new Component(view, viewModel);
-            components = new List<Component>();
             components.Add(component);
         }
 
@@ -114,11 +116,11 @@ namespace FUI
         /// <summary>
         /// 打开这个容器
         /// </summary>
-        internal void Open()
+        internal void Open(object param)
         {
             foreach(var component in components)
             {
-                component.Open();
+                component.Open(param);
             }
         }
 

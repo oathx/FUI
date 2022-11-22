@@ -6,7 +6,7 @@ using System;
 namespace FUI.UGUI.ValueConverter
 {
     [RequireComponent(typeof(Button))]
-    public class ActionToButtonEventConverter : UGUIValueConverter<Action>
+    public class ActionToButtonEventConverter : UGUIVisualElement<Action>
     {
         Button button;
 
@@ -15,7 +15,7 @@ namespace FUI.UGUI.ValueConverter
             button = transform.GetComponent<Button>();
         }
 
-        public override void Convert(Action value)
+        public override void OnValueChanged(Action value)
         {
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(()=>value.Invoke());

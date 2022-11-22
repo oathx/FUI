@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace FUI.UGUI.ValueConverter
 {
     [RequireComponent(typeof(Text))]
-    public class StringToTextConverter : UGUIValueConverter<string>
+    public class StringToTextConverter : UGUIVisualElement<string>
     {
         Text text;
 
@@ -14,7 +14,7 @@ namespace FUI.UGUI.ValueConverter
             text = transform.GetComponent<Text>();
         }
 
-        public override void Convert(string value)
+        public override void OnValueChanged(string value)
         {
             text.text = value;
         }

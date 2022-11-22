@@ -32,14 +32,14 @@ namespace FUI.Test
 
             foreach(var item in gameObject.transform.GetComponentsInChildren<Transform>(true))
             {
-                var converter = item.GetComponent<IValueConverter>();
+                var converter = item.GetComponent<IVisualElement>();
                 if(converter == null)
                 {
                     continue;
                 }
 
                 var bindingPropertyName = config[item.name];
-                AddConverter(bindingPropertyName, converter);
+                AddVisualElement(bindingPropertyName, converter);
             }
         }
 
@@ -50,20 +50,20 @@ namespace FUI.Test
             {
                 case "Name":
                     var name = GetValue<string>(propertyName);
-                    Convert(propertyName, name);
+                    PropertyChanged(propertyName, name);
                     break;
                 case "ID":
                     var id = GetValue<int>(propertyName);
-                    Convert(propertyName, id);
+                    PropertyChanged(propertyName, id);
                     break;
                 case "Age":
                     var age = GetValue<int>(propertyName);
-                    Convert(propertyName, age);
+                    PropertyChanged(propertyName, age);
                     break;
                 case "Submit":
                     UnityEngine.Debug.Log($"OnPropertyChanged:{propertyName}  value:{GetValue<System.Action>(propertyName)}");
                     var submit = GetValue<System.Action>(propertyName);
-                    Convert(propertyName, submit);
+                    PropertyChanged(propertyName, submit);
                     break;
             }
         }
@@ -71,7 +71,7 @@ namespace FUI.Test
         T GetValue<T>(string propertyName)
         {
             var flag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-            var value = bindingContext.GetType().GetProperty(propertyName, flag).GetValue(bindingContext);
+            var value = BindingContext.GetType().GetProperty(propertyName, flag).GetValue(BindingContext);
             return (T)value;
         }
     }

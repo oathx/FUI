@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-namespace FUI.UGUI.ValueConverter
+namespace FUI.UGUI.VisualElement
 {
     [RequireComponent(typeof(Button))]
     public class ActionToButtonEventConverter : UGUIVisualElement<Action>

@@ -18,10 +18,10 @@ namespace FUI
         }
 
         /// <summary>
-        /// 通过默认的ViewModel打开一个View
+        /// 通过默认的ViewModel打开一个界面
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void Open<TView>() where TView : View
+        /// <param name="viewName">界面名字</param>
+        public void Open(string viewName)
         {
 
         }
@@ -29,9 +29,9 @@ namespace FUI
         /// <summary>
         /// 通过指定的ViewModel打开一个View
         /// </summary>
-        /// <typeparam name="TView"></typeparam>
         /// <typeparam name="TViewModel"></typeparam>
-        public void Open<TView, TViewModel>() where TView : View where TViewModel : ViewModel
+        /// <param name="viewName"></param>
+        public void Open<TViewModel>(string viewName) where TViewModel : ViewModel
         {
 
         }

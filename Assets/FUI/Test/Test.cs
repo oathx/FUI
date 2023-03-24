@@ -7,31 +7,37 @@ namespace FUI.Test
 {
     public class Test : MonoBehaviour
     {
-        void Awake()
+        async void Awake()
         {
-            OpenView<TestViewGenerated>();
+            var vm1 = OpenView<TestViewModel>("TestView");
+            vm1.Name = new Name { firstName = "test", lastName = "1Name" };
+            vm1.ID = 1;
+            vm1.Age = 10;
+
+            await Task.Delay(5000);
+            var vm2 = OpenView<TestViewModel>("TestView1");
+            vm2.Name = new Name { firstName = "test", lastName = "2Name" };
+            vm2.ID = 2;
+            vm2.Age = 20;
+
+            await Task.Delay(5000);
+            var vm3 = OpenView<TestViewModel1>("TestView");
+            vm3.Name = new Name { firstName = "test", lastName = "3Name" };
+            vm3.ID = 3;
+            vm3.Age = 30;
         }
 
-        async void OpenView<T>() where T : View
+        TViewModel OpenView<TViewModel>(string viewName) where TViewModel : ViewModel
         {
-            var vm = new SampleViewModel();
-            var view = Activator.CreateInstance(typeof(T), vm);
-
+            var vm = Activator.CreateInstance<TViewModel>();
+            var assetLoader = new TestAssetLoader();
+            var assetPath = viewName;
+            //TODO 这个地方存在字符串拼接   这个可以通过注入解决
+            var viewTypeName = $"FUI.Test.{viewName}_{vm.GetType().Name}_Generated";
+            var viewType = Type.GetType(viewTypeName);
+            var view = Activator.CreateInstance(viewType, vm, assetLoader, assetPath);
             vm.Initialize();
-
-            vm.Name = "test1Name";
-            vm.ID = 1;
-            vm.Age = 10;
-
-            await Task.Delay(1000);
-            vm.Name = "test2Naame";
-            vm.ID = 2;
-            vm.Age = 20;
-
-            await Task.Delay(1000);
-            vm.Name = "test3Name";
-            vm.ID = 3;
-            vm.Age = 30;
+            return vm;
         }
     }
 }

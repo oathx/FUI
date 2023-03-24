@@ -9,7 +9,7 @@ namespace FUI.Editor
 {
     public class FUIInjector
     {
-        [UnityEditor.MenuItem("Tools/Test")]
+        [UnityEditor.MenuItem("Tools/FUI/InjectPropertyChanged")]
         public static void Inject()
         {
             //TODO 只加载目标dll  依赖的dll通过module.refrenceassemblies 来加载
@@ -42,6 +42,12 @@ namespace FUI.Editor
             UnityEngine.Debug.Log($"inject PropertyChanged complete");
         }
 
+        /// <summary>
+        /// 向可绑定的属性Set方法注入属性更改委托
+        /// </summary>
+        /// <param name="module"></param>
+        /// <param name="property"></param>
+        /// <param name="propertyChangedMethodName"></param>
         static void InjectPropertyChangedMethod(ModuleDefinition module, PropertyDefinition property, string propertyChangedMethodName)
         {
             var flag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;

@@ -10,10 +10,5 @@ namespace FUI.Bindable
         {
             PropertyChanged?.Invoke(this, propertyName);
         }
-
-        public T GetValue<T>()
-        {
-            return default;
-        }
     }
 }

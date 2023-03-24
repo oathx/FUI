@@ -6,7 +6,7 @@ namespace FUI
     public class BindingAttribute : Attribute
     {
         public readonly string target;
-        public readonly Type converterType;
+        public readonly Type visualElementType;
 
         /// <summary>
         /// 不指定目标和转换器类型
@@ -23,14 +23,14 @@ namespace FUI
         }
 
         /// <summary>
-        /// 绑定一个属性到某个值转换器
+        /// 绑定一个属性到某个视觉元素
         /// </summary>
         /// <param name="target">目标</param>
-        /// <param name="converterType">值转换器类型</param>
-        public BindingAttribute(string target, Type converterType)
+        /// <param name="visualElementType">视觉元素类型</param>
+        public BindingAttribute(string target, Type visualElementType)
         {
             this.target = target;
-            this.converterType = converterType;
+            this.visualElementType = visualElementType;
         }
     }
 }

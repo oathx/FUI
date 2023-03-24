@@ -38,7 +38,7 @@ namespace FUI
         /// </summary>
         /// <param name="sender">绑定的上下文</param>
         /// <param name="propertyName">更改的属性名</param>
-        protected abstract void OnPropertyChanged(object sender, string propertyName);
+        protected virtual void OnPropertyChanged(object sender, string propertyName) { }
 
         /// <summary>
         /// 绑定一个上下文
@@ -76,10 +76,10 @@ namespace FUI
         }
 
         /// <summary>
-        /// 添加一个值转换器
+        /// 添加一个视觉元素
         /// </summary>
         /// <param name="propertyName">要转换的属性名</param>
-        /// <param name="converter">转换器</param>
+        /// <param name="visualElement">视觉元素</param>
         protected void AddVisualElement(string propertyName, IVisualElement visualElement)
         {
             if(!visualElements.TryGetValue(propertyName, out var elementList))
@@ -94,10 +94,10 @@ namespace FUI
         }
 
         /// <summary>
-        /// 移除一个值转换器
+        /// 移除一个视觉元素
         /// </summary>
         /// <param name="propertyName">转换的属性名</param>
-        /// <param name="converter">转换器</param>
+        /// <param name="visualElement">视觉元素</param>
         protected void RemoveVisualElement(string propertyName, IVisualElement visualElement)
         {
             if(!visualElements.TryGetValue(propertyName, out var elementList))
@@ -135,6 +135,24 @@ namespace FUI
         /// <summary>
         /// 将一个绑定的属性应用到对应的视觉元素
         /// </summary>
+        /// <param name="propertyName">绑定的属性名</param>
+        /// <param name="value">绑定的属性值</param>
+        protected void PropertyChanged(string propertyName, object value)
+        {
+            if (!visualElements.TryGetValue(propertyName, out var elements))
+            {
+                return;
+            }
+
+            foreach (var element in elements)
+            {
+                element.OnValueChanged(value);
+            }
+        }
+
+        /// <summary>
+        /// 将一个绑定的属性应用到对应的视觉元素
+        /// </summary>
         /// <typeparam name="T">值类型</typeparam>
         /// <param name="propertyName">绑定的属性名</param>
         /// <param name="value">绑定的属性值</param>
@@ -146,7 +164,7 @@ namespace FUI
             }
 
             foreach(var element in elements)
-            {
+            { 
                 (element as IVisualElement<T>).OnValueChanged(value);
             }
         }

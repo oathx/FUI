@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FUI.UGUI.ValueConverter
+namespace FUI.UGUI.VisualElement
 {
     [RequireComponent(typeof(Text))]
     public class StringToTextConverter : UGUIVisualElement<string>

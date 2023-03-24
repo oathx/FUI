@@ -1,8 +1,8 @@
 ﻿namespace FUI
 {
-    public interface IVisualElement<T>
+    public interface IVisualElement<TValue>
     {
-        void OnValueChanged(T value);
+        void OnValueChanged(TValue value);
     }
 
     public interface IVisualElement

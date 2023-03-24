@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FUI.UGUI.ValueConverter
+namespace FUI.UGUI.VisualElement
 {
     [RequireComponent(typeof(Image))]
     public class IntToFormatImageConverter : UGUIVisualElement<int>
@@ -17,8 +17,7 @@ namespace FUI.UGUI.ValueConverter
 
         public override void OnValueChanged(int value)
         {
-            //暂时这个地方这样加载资源  后续注入资源加载器
-            image.sprite = Resources.Load<Sprite>(string.Format(formatString, value));
+            image.sprite = AssetLoader.Load<Sprite>(string.Format(formatString, value));
         }
     }
 }

@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 110.9}
+  m_AnchoredPosition: {x: 698, y: 110.9}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6496416245852526025
@@ -201,7 +201,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -75.6}
+  m_AnchoredPosition: {x: 698, y: -75.6}
   m_SizeDelta: {x: 225.91733, y: 42.359497}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3312788902416625512
@@ -294,7 +294,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -263}
+  m_AnchoredPosition: {x: 698, y: -263}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2984758670039530508
@@ -402,7 +402,7 @@ GameObject:
   - component: {fileID: 7044993777799422260}
   - component: {fileID: 5146929232749467492}
   m_Layer: 5
-  m_Name: TestView
+  m_Name: TestView1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -551,7 +551,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.6415094, g: 0.63243145, b: 0.63243145, a: 1}
+  m_Color: {r: 0.56585974, g: 0.6307725, b: 0.6415094, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -602,7 +602,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -154}
+  m_AnchoredPosition: {x: 698, y: -154}
   m_SizeDelta: {x: 225.91733, y: 42.359497}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8204756082225896594
@@ -669,7 +669,7 @@ GameObject:
   - component: {fileID: 3865576125746401470}
   - component: {fileID: 7837418372863900983}
   - component: {fileID: 5286834136830635927}
-  - component: {fileID: 5010143695133029567}
+  - component: {fileID: 4827375777850624482}
   m_Layer: 5
   m_Name: txt_Name
   m_TagString: Untagged
@@ -693,7 +693,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 6.18}
+  m_AnchoredPosition: {x: 698, y: 6.18}
   m_SizeDelta: {x: 225.91733, y: 42.359497}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7837418372863900983
@@ -737,7 +737,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
---- !u!114 &5010143695133029567
+--- !u!114 &4827375777850624482
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

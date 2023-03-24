@@ -3,11 +3,23 @@ using System;
 
 namespace FUI.Test
 {
-    [Binding("SampleView")]
-    public class SampleViewModel : ViewModel
+    public class Name
+    {
+        public string firstName;
+        public string lastName;
+
+        public override string ToString()
+        {
+            return $"{lastName} {firstName}";
+        }
+    } 
+
+    [Binding("TestView")]
+    [Binding("TestView1")]
+    public class TestViewModel : ViewModel
     {
         [Binding]
-        public string Name { get; set; }
+        public Name Name { get; set; }
 
         [Binding]
         public int ID { get; set; }
@@ -16,19 +28,19 @@ namespace FUI.Test
         public int Age { get; set; }
 
         [Binding]
-        Action Submit { get; set; }
+        public Action Submit { get; set; }
 
         public override void Initialize()
         {
-            Name = "Test";
+            Name = new Name { firstName = "Test", lastName = "1" };
             ID = 0;
             Age = 0;
             Submit = OnSubmit;
         }
 
-        void OnSubmit()
+        protected virtual void OnSubmit()
         {
-            UnityEngine.Debug.Log("ClickBtn....");
+            UnityEngine.Debug.Log("ClickBtn TestViewModel....");
         }
     }
 }

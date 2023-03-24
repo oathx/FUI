@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Specialized;
 
 namespace FUI.Bindable
 {
@@ -6,5 +6,11 @@ namespace FUI.Bindable
     public interface INotifyPropertyChanged
     {
         event PropertyChangedHandler PropertyChanged;
+    }
+
+    public delegate void CollectionChangedHandler(object sender, NotifyCollectionChangedEventArgs args);
+    public interface INotifyCollectionChanged
+    {
+        event CollectionChangedHandler CollectionChanged;
     }
 }

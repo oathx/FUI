@@ -1,5 +1,6 @@
 ﻿using FUI.UGUI;
 
+using System;
 using System.Collections.Generic;
 
 namespace FUI.Test
@@ -23,22 +24,30 @@ namespace FUI.Test
             };
         }
 
+        delegate void PropertyChangedDelegate(object value);
+        delegate void PropertyChangedDelegate<T>(T value);
+
+        PropertyChangedDelegate NameChanged;
+        PropertyChangedDelegate<int> IDChanged;
+        PropertyChangedDelegate<int> AgeChanged;
+        PropertyChangedDelegate<Action> SubmitChanged;
+
         protected override void OnPropertyChanged(object sender, string propertyName)
         {
             var context = BindingContext as TestViewModel;
             switch (propertyName)
             {
                 case "Name":
-                    PropertyChanged(propertyName, (object)context.Name);
+                    NameChanged?.Invoke(context.Name);
                     break;
                 case "ID":
-                    PropertyChanged(propertyName, context.ID);
+                    IDChanged?.Invoke(context.ID);
                     break;
                 case "Age":
-                    PropertyChanged(propertyName, context.Age);
+                    AgeChanged?.Invoke(context.Age);
                     break;
                 case "Submit":
-                    PropertyChanged(propertyName, context.Submit);
+                    SubmitChanged?.Invoke(context.Submit);
                     break;
             }
         }

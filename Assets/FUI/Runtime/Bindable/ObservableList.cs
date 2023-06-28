@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 
 namespace FUI.Bindable
 {
-    public class ObservableList<T> : INotifyCollectionChanged, IList<T>, ICollection<T>, IEnumerable<T>, IList, ICollection, IEnumerable
+    public class ObservableList<T> : INotifyCollectionChanged, IList<T>, IList where T : ObservableObject
     {
         readonly List<T> items;
 

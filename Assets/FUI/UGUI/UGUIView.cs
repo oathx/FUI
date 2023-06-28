@@ -31,10 +31,10 @@ namespace FUI.UGUI
         /// <param name="gameObject">这个view对应的gameobject</param>
         /// <param name="bindingContext">绑定的上下文</param>
         /// <param name="assetLoader">这个view对应的资源加载器</param>
-        public UGUIView(GameObject gameObject, ViewModel bindingContext, IAssetLoader assetLoader) : base(bindingContext)
+        public UGUIView(ViewModel bindingContext, IAssetLoader assetLoader, GameObject gameObject) : base(bindingContext)
         {
-            this.gameObject = gameObject;
             this.assetLoader = assetLoader;
+            this.gameObject = gameObject;
             InitializeVisualElements();
         }
 
@@ -56,23 +56,10 @@ namespace FUI.UGUI
             }
 
             //获取所有的视觉元素组件
-            foreach (var item in gameObject.transform.GetComponentsInChildren<Transform>(true))
+            foreach (var element in gameObject.transform.GetComponentsInChildren<UGUIVisualElement>(true))
             {
-                var element = item.GetComponent<IVisualElement>();
-                if (element == null)
-                {
-                    continue;
-                }
-
-                //如果不是UGUI所对应的视觉元素组件则不进行初始化
-                if(!(element is UGUIVisualElement uguiElement))
-                {
-                    Debug.LogWarning($"{gameObject.name} {item.name} {element} is not UGUIVisualElement");
-                    continue;
-                }
-
-                uguiElement.SetAssetLoader(assetLoader);
-                var bindingPropertyName = config[item.name];
+                element.SetAssetLoader(assetLoader);
+                var bindingPropertyName = config[element.name];
                 AddVisualElement(bindingPropertyName, element);
             }
         }

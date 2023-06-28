@@ -19,7 +19,8 @@ namespace FUI.Test
                 {"txt_ID", "ID" },
                 {"txt_Age", "Age" },
                 {"img_Icon", "ID" },
-                {"btn_submit", "Submit" }
+                {"btn_submit", "Submit" },
+                {"ls_Items", "List"},
             };
         }
 
@@ -39,6 +40,9 @@ namespace FUI.Test
                     break;
                 case "Submit":
                     PropertyChanged(propertyName, context.Submit);
+                    break;
+                case "List":
+                    PropertyChanged(propertyName, context.List);
                     break;
             }
         }

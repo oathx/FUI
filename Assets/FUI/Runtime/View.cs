@@ -49,6 +49,11 @@ namespace FUI
             {
                 return propertyName.GetHashCode() ^ elementName.GetHashCode() ^ elementType.GetHashCode();
             }
+
+            public override string ToString()
+            {
+                return $"PropertyName:{propertyName} elementName:{elementName} elementType:{elementType}";
+            }
         }
         #endregion
 
@@ -113,12 +118,12 @@ namespace FUI
         {
             if(this.BindingContext != null)
             {
-                throw new System.Exception("bindingContext not null, you must unbinding before binding");
+                throw new System.Exception($"{Name} binding error: bindingContext not null, you must unbinding first");
             }
 
             if(bindingContext == null)
             {
-                throw new System.Exception("binding error, bindingContext is null");
+                throw new System.Exception($"{Name} binding error: bindingContext is null");
             }
 
             this.BindingContext = bindingContext;
@@ -156,8 +161,23 @@ namespace FUI
                 elementList.Add(visualElement);
             }
 
-            var key = new VisualElementPropertyNameKey(propertyName, visualElement.GetType());
-            visualElementLookup[key] = visualElement;
+            var propertyNameKey = new VisualElementPropertyNameKey(propertyName, visualElement.GetType());
+            if(!visualElementLookup.TryGetValue(propertyNameKey, out var elementList2))
+            {
+                elementList2 = new List<IVisualElement> { visualElement };
+                visualElementLookup[propertyNameKey] = elementList2;
+            }
+            else
+            {
+                elementList2.Add(visualElement);
+            }
+
+            var uniqueKey = new VisualElementUniqueKey(propertyName, elementName, visualElement.GetType());
+            if(visualElementUniqueLookup.ContainsKey(uniqueKey))
+            {
+                UnityEngine.Debug.LogWarning($"{Name} already contains uniqueKey {uniqueKey} will replace it");
+            }
+            visualElementUniqueLookup[uniqueKey] = visualElement;
         }
 
         /// <summary>

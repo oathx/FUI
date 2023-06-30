@@ -30,7 +30,7 @@ namespace FUI.Editor
             {
                 foreach (var property in type.Properties)
                 {
-                    if (!property.HasCustomAttribute<BindingAttribute>())
+                    if (!property.HasCustomAttribute<BindingAttribute>() || property.SetMethod == null)
                     {
                         continue;
                     }

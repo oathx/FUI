@@ -10,17 +10,23 @@ namespace FUI
     {
         #region 视觉元素查找键
         /// <summary>
-        /// 视觉元素查找键
+        /// 视觉元素_绑定的属性名_视觉元素类型_查找键
         /// </summary>
-        struct VisualElementPropertyNameKey
+        struct VE_PN_T_KEY
         {
-            readonly string propertyName;
-            readonly Type elementType;
+            public readonly string propertyName;
+            public readonly string elementType;
 
-            public VisualElementPropertyNameKey(string propertyName, Type elementType)
+            public VE_PN_T_KEY(string propertyName, string elementType)
             {
                 this.propertyName = propertyName;
                 this.elementType = elementType;
+            }
+
+            public VE_PN_T_KEY(string propertyName, IVisualElement visualElement)
+            {
+                this.propertyName = propertyName;
+                this.elementType = visualElement.GetType().FullName;
             }
 
             public override int GetHashCode()
@@ -32,17 +38,33 @@ namespace FUI
         /// <summary>
         /// 视觉元素唯一键
         /// </summary>
-        struct VisualElementUniqueKey
+        struct VE_U_KEY
         {
-            readonly string propertyName;
-            readonly string elementName;
-            readonly Type elementType;
+            /// <summary>
+            /// 绑定的属性名
+            /// </summary>
+            public readonly string propertyName;
+            /// <summary>
+            /// 视觉元素的名字
+            /// </summary>
+            public readonly string elementName;
+            /// <summary>
+            /// 视觉元素的类型
+            /// </summary>
+            public readonly string elementType;
 
-            public VisualElementUniqueKey(string propertyName, string elementName, Type elementType)
+            public VE_U_KEY(string propertyName, string elementName, string elementType)
             {
                 this.propertyName = propertyName;
                 this.elementName = elementName;
                 this.elementType = elementType;
+            }
+
+            public VE_U_KEY(string propertyName, string elementName, IVisualElement visualElement)
+            {
+                this.propertyName = propertyName;
+                this.elementName = elementName;
+                this.elementType = visualElement.GetType().FullName;
             }
 
             public override int GetHashCode()
@@ -68,19 +90,19 @@ namespace FUI
         public string Name { get; private set; }
 
         /// <summary>
+        /// 视觉元素唯一查找表
+        /// </summary>
+        Dictionary<VE_U_KEY, IVisualElement> VE_U_MAP;
+
+        /// <summary>
         /// 视觉元素属性名映射表
         /// </summary>
-        Dictionary<string, List<IVisualElement>> visualElements;
+        Dictionary<string, List<IVisualElement>> VE_PN_MAP;
 
         /// <summary>
         /// 视觉元素 属性名加类型 映射表
         /// </summary>
-        Dictionary<VisualElementPropertyNameKey, List<IVisualElement>> visualElementLookup;
-
-        /// <summary>
-        /// 视觉元素唯一查找表
-        /// </summary>
-        Dictionary<VisualElementUniqueKey, IVisualElement> visualElementUniqueLookup;
+        Dictionary<VE_PN_T_KEY, List<IVisualElement>> VE_PN_T_MAP;
 
         /// <summary>
         /// 初始化这个View
@@ -88,9 +110,9 @@ namespace FUI
         public View(string name)
         {
             this.Name = name;
-            visualElements = new Dictionary<string, List<IVisualElement>>();
-            visualElementLookup = new Dictionary<VisualElementPropertyNameKey, List<IVisualElement>>();
-            visualElementUniqueLookup = new Dictionary<VisualElementUniqueKey, IVisualElement>();
+            VE_U_MAP = new Dictionary<VE_U_KEY, IVisualElement>();
+            VE_PN_MAP = new Dictionary<string, List<IVisualElement>>();
+            VE_PN_T_MAP = new Dictionary<VE_PN_T_KEY, List<IVisualElement>>();
         }
 
         /// <summary>
@@ -121,12 +143,7 @@ namespace FUI
                 throw new System.Exception($"{Name} binding error: bindingContext not null, you must unbinding first");
             }
 
-            if(bindingContext == null)
-            {
-                throw new System.Exception($"{Name} binding error: bindingContext is null");
-            }
-
-            this.BindingContext = bindingContext;
+            this.BindingContext = bindingContext ?? throw new System.Exception($"{Name} binding error: bindingContext is null");
             this.BindingContext.PropertyChanged += OnPropertyChanged;
         }
 
@@ -147,78 +164,71 @@ namespace FUI
         /// <summary>
         /// 添加一个视觉元素
         /// </summary>
-        /// <param name="propertyName">要转换的属性名</param>
-        /// <param name="visualElement">视觉元素</param>
+        /// <param name="propertyName">这个视觉元素绑定的属性名</param>
+        /// <param name="elementName">这个视觉元素的名字</param>
+        /// <param name="visualElement">要添加的视觉元素</param>
         protected void AddVisualElement(string propertyName, string elementName, IVisualElement visualElement)
         {
-            if(!visualElements.TryGetValue(propertyName, out var elementList))
+            var uniqueKey = new VE_U_KEY(propertyName, elementName, visualElement);
+            if (VE_U_MAP.ContainsKey(uniqueKey))
+            {
+                UnityEngine.Debug.LogWarning($"{Name} already contains uniqueKey {uniqueKey} will replace it");
+            }
+            VE_U_MAP[uniqueKey] = visualElement;
+
+            if (!VE_PN_MAP.TryGetValue(propertyName, out var elementList))
             {
                 elementList = new List<IVisualElement> { visualElement };
-                visualElements[propertyName] = elementList;
+                VE_PN_MAP[propertyName] = elementList;
             }
             else
             {
                 elementList.Add(visualElement);
             }
 
-            var propertyNameKey = new VisualElementPropertyNameKey(propertyName, visualElement.GetType());
-            if(!visualElementLookup.TryGetValue(propertyNameKey, out var elementList2))
+            var propertyNameKey = new VE_PN_T_KEY(propertyName, visualElement);
+            if(!VE_PN_T_MAP.TryGetValue(propertyNameKey, out var elementList2))
             {
                 elementList2 = new List<IVisualElement> { visualElement };
-                visualElementLookup[propertyNameKey] = elementList2;
+                VE_PN_T_MAP[propertyNameKey] = elementList2;
             }
             else
             {
                 elementList2.Add(visualElement);
             }
-
-            var uniqueKey = new VisualElementUniqueKey(propertyName, elementName, visualElement.GetType());
-            if(visualElementUniqueLookup.ContainsKey(uniqueKey))
-            {
-                UnityEngine.Debug.LogWarning($"{Name} already contains uniqueKey {uniqueKey} will replace it");
-            }
-            visualElementUniqueLookup[uniqueKey] = visualElement;
         }
 
         /// <summary>
         /// 移除一个视觉元素
         /// </summary>
-        /// <param name="propertyName">转换的属性名</param>
-        /// <param name="visualElement">视觉元素</param>
-        protected void RemoveVisualElement(string propertyName, IVisualElement visualElement)
+        /// <param name="visualElement">要移除的视觉元素</param>
+        protected void RemoveVisualElement(IVisualElement visualElement)
         {
-            if(!visualElements.TryGetValue(propertyName, out var elementList))
+            VE_U_KEY? uniqueKey = null;
+            foreach(var kv in VE_U_MAP)
+            {
+                if(kv.Value == visualElement)
+                {
+                    uniqueKey = kv.Key;
+                    VE_U_MAP.Remove(kv.Key);
+                    break;
+                }
+            }
+
+            if(uniqueKey == null)
             {
                 return;
             }
 
-            if (elementList.Contains(visualElement))
+            if(VE_PN_MAP.TryGetValue(uniqueKey.Value.propertyName, out var elementList))
             {
                 elementList.Remove(visualElement);
             }
 
-            var key = new VisualElementPropertyNameKey(propertyName, visualElement.GetType());
-            if (visualElementLookup.ContainsKey(key))
+            var pn_t_key = new VE_PN_T_KEY(uniqueKey.Value.propertyName, visualElement);
+            if(VE_PN_T_MAP.TryGetValue(pn_t_key, out elementList))
             {
-                visualElementLookup.Remove(key);
-            }
-        }
-
-        /// <summary>
-        /// 移除一个值所绑定的视觉元素
-        /// </summary>
-        /// <param name="propertyName">转换的属性名</param>
-        protected void RemoveVisualElement(string propertyName)
-        {
-            if(!visualElements.TryGetValue(propertyName, out var element))
-            {
-                return;
-            }
-            visualElements.Remove(propertyName);
-            var key = new VisualElementPropertyNameKey(propertyName, element.GetType());
-            if (visualElementLookup.ContainsKey(key))
-            {
-                visualElementLookup.Remove(key);
+                elementList.Remove(visualElement);
             }
         }
 
@@ -227,8 +237,26 @@ namespace FUI
         /// </summary>
         protected void RemoveVisualElements()
         {
-            visualElements.Clear();
-            visualElementLookup.Clear();
+            VE_U_MAP.Clear();
+            VE_PN_MAP.Clear();
+            VE_PN_T_MAP.Clear();
+        }
+
+        /// <summary>
+        /// 获取一个视觉元素
+        /// </summary>
+        /// <typeparam name="TVisualElement">视觉元素类型</typeparam>
+        /// <param name="propertyName">这个视觉元素绑定的属性名</param>
+        /// <param name="elementName">元素名</param>
+        /// <returns></returns>
+        protected TVisualElement GetVisualElement<TVisualElement>(string propertyName, string elementName) where TVisualElement : IVisualElement
+        {
+            var uniqueKey = new VE_U_KEY(propertyName, elementName, typeof(TVisualElement).FullName);
+            if(!VE_U_MAP.TryGetValue(uniqueKey, out var visualElement))
+            {
+                return default;
+            }
+            return (TVisualElement)visualElement;
         }
 
         /// <summary>
@@ -238,7 +266,7 @@ namespace FUI
         /// <returns>元素集合</returns>
         protected IEnumerable<IVisualElement> GetVisualElements(string propertyName)
         {
-            if(!visualElements.TryGetValue(propertyName, out var elements))
+            if(!VE_PN_MAP.TryGetValue(propertyName, out var elements))
             {
                 return null;
             }
@@ -254,33 +282,17 @@ namespace FUI
         /// <returns>元素集合</returns>
         protected IEnumerable<IVisualElement<TValue>> GetVisualElements<TValue>(string propertyName)
         {
-            if (!visualElements.TryGetValue(propertyName, out var elements))
+            if (!VE_PN_MAP.TryGetValue(propertyName, out var elements))
             {
                 return null;
             }
             return elements.Cast<IVisualElement<TValue>>();
         }
 
-        /// <summary>
-        /// 获取绑定某个属性的所有元素
-        /// </summary>
-        /// <typeparam name="TVisualElement">元素类型</typeparam>
-        /// <param name="propertyName">属性名</param>
-        /// <returns>对应元素</returns>
-        protected IEnumerable<IVisualElement> GetVisualElements<TVisualElement>(string propertyName) where TVisualElement : IVisualElement
-        {
-            var key = new VisualElementPropertyNameKey(propertyName, typeof(TVisualElement));
-            if(visualElementLookup.TryGetValue(key, out var element))
-            {
-                return element;
-            }
-            return null;
-        }
-
         protected IVisualElement<TValue> GetVisualElement<TVisualElement, TValue>(string propertyName) where TVisualElement : IVisualElement<TValue>
         {
-            var key = new VisualElementPropertyNameKey(propertyName, typeof(TValue));
-            if(visualElementLookup.TryGetValue(key, out var element))
+            var key = new VE_PN_T_KEY(propertyName, typeof(TValue).FullName);
+            if(VE_PN_T_MAP.TryGetValue(key, out var element))
             {
                 return (IVisualElement<TValue>)element;
             }
@@ -314,7 +326,7 @@ namespace FUI
         /// <param name="value">绑定的属性值</param>
         protected void PropertyChanged<TVisualElement>(string propertyName, object value) where TVisualElement : IVisualElement 
         {
-            if (!visualElements.TryGetValue(propertyName, out var elements))
+            if (!VE_PN_MAP.TryGetValue(propertyName, out var elements))
             {
                 return;
             }
@@ -336,7 +348,7 @@ namespace FUI
         /// <param name="value">绑定的属性值</param>
         protected void PropertyChanged<T>(string propertyName, T value)
         {
-            if(!visualElements.TryGetValue(propertyName, out var elements))
+            if(!VE_PN_MAP.TryGetValue(propertyName, out var elements))
             {
                 return;
             }
@@ -360,7 +372,7 @@ namespace FUI
         /// <param name="value">绑定的属性值</param>
         protected void PropertyChanged<TVisualElement, TValue>(string propertyName, TValue value) where TVisualElement : IVisualElement<TValue>
         {
-            if (!visualElements.TryGetValue(propertyName, out var elements))
+            if (!VE_PN_MAP.TryGetValue(propertyName, out var elements))
             {
                 return;
             }

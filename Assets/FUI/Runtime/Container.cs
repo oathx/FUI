@@ -44,7 +44,7 @@ namespace FUI
         /// </summary>
         internal void Open(object param)
         {
-            ViewModel.OnOpen(param);
+            //ViewModel.OnOpen(param);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace FUI
         /// </summary>
         internal void Close()
         {
-            ViewModel.OnClose();
+            //ViewModel.OnClose();
         }
 
         /// <summary>

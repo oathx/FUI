@@ -3,4 +3,5 @@ using FUISourcesGenerator;
 
 Console.WriteLine("Hello, World!");
 var generator = new Generator();
-generator.Generate(new string[] {generator.TestString}, null, string.Empty);
+generator.generators.Add(new DataBindingGenerator());
+await generator.LoadProject(@"D:\FUI\FUI.sln", "FUI.Test");

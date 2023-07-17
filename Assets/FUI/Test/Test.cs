@@ -36,7 +36,7 @@ namespace FUI.Test
             var viewTypeName = $"FUI.Test.{viewName}_{vm.GetType().Name}_Generated";
             var viewType = Type.GetType(viewTypeName);
             var view = Activator.CreateInstance(viewType, vm, assetLoader, assetPath);
-            vm.Initialize();
+            //vm.Initialize();
             return vm;
         }
     }

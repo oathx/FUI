@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace FUI.UGUI
 {
@@ -39,28 +37,15 @@ namespace FUI.UGUI
         }
 
         /// <summary>
-        /// 加载对应的绑定配置
-        /// </summary>
-        /// <returns></returns>
-        protected virtual Dictionary<string, string> LoadBindingConfig() => null;
-
-        /// <summary>
         /// 初始化这个界面的视觉元素
         /// </summary>
         protected virtual void InitializeVisualElements()
         {
-            var config = LoadBindingConfig();
-            if(config == null)
-            {
-                return;
-            }
-
             //获取所有的视觉元素组件
             foreach (var element in gameObject.transform.GetComponentsInChildren<UGUIVisualElement>(true))
             {
                 element.SetAssetLoader(assetLoader);
-                var bindingPropertyName = config[element.name];
-                AddVisualElement(bindingPropertyName, element.name, element);
+                AddVisualElement(element.name, element);
             }
         }
     }

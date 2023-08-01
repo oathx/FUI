@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
+using Mono.Cecil;
+
 namespace FUISourcesGenerator
 {
     internal struct Source
@@ -19,8 +21,36 @@ namespace FUISourcesGenerator
             this.Text = SourceText.From(text);
         }
     }
-    internal interface ISourcesGenerator
+
+    /// <summary>
+    /// 根据类型的语法树 生成代码
+    /// </summary>
+    internal interface ITypeSyntaxNodeSourcesGenerator
     {
-        Source? Generate(SyntaxNode root);
+        Source?[] Generate(SyntaxNode root);
+    }
+
+    /// <summary>
+    /// 根据类型定义生成代码
+    /// </summary>
+    internal interface ITypeDefinationSourcesGenerator
+    {
+        Source?[] GetSource(ModuleDefinition moduleDefinition, TypeDefinition typeDefinition);
+    }
+
+    /// <summary>
+    /// 编译前源代码生成器
+    /// </summary>
+    internal interface IBeforeCompilerSourcesGenerator
+    {
+        Source?[] Generate();
+    }
+
+    /// <summary>
+    /// 类型定义注入器
+    /// </summary>
+    internal interface ITypeDefinationInjector
+    {
+        void Inject(ModuleDefinition moduleDefinition, TypeDefinition typeDefinition);
     }
 }

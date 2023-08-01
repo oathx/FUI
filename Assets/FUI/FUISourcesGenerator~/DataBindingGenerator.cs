@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FUISourcesGenerator
 {
-    internal class DataBindingGenerator : ISourcesGenerator
+    internal class DataBindingGenerator : ITypeSyntaxNodeSourcesGenerator
     {
-        Source? ISourcesGenerator.Generate(SyntaxNode root)
+        Source?[] ITypeSyntaxNodeSourcesGenerator.Generate(SyntaxNode root)
         {
             var classDeclarations = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
             foreach(var classDeclaration in classDeclarations)

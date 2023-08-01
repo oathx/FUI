@@ -2,6 +2,8 @@
 using FUISourcesGenerator;
 
 Console.WriteLine("Hello, World!");
+const string output = "../output/test.dll";
 var generator = new Generator();
-generator.generators.Add(new DataBindingGenerator());
-await generator.LoadProject(@"D:\FUI\FUI.sln", "FUI.Test");
+generator.typeSyntaxRootGenerators.Add(new DataBindingGenerator());
+generator.typeDefinationInjectors.Add(new PropertyChangedInjector());
+await generator.LoadProject(@"D:\FUI\FUI.sln", "FUI.Test", output);

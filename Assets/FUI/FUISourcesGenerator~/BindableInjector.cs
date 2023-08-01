@@ -5,39 +5,30 @@ using System.Reflection;
 
 namespace FUISourcesGenerator
 {
-    public class FUIInjector
+    public class PropertyChangedInjector : ITypeDefinationInjector
     {
+        const string observableObjectTypeName = "FUI.Bindable.ObservableObject";
         const string propertyChangedMethodName = "OnPropertyChanged";
-        const string output = "../output/test.dll";
+        const string bindingAttributeTypeName = "FUI.BindingAttribute";
+        const string fuiPath = "../../../../../../Library/ScriptAssemblies/FUI.Runtime.dll";
 
-        public static void Inject(MemoryStream assemblyStream)
+        void ITypeDefinationInjector.Inject(Mono.Cecil.ModuleDefinition moduleDefinition, Mono.Cecil.TypeDefinition typeDefinition)
         {
-            InjectPropertyChanged(assemblyStream);
-        }
-
-        /// <summary>
-        /// 注入属性更改通知方法
-        /// </summary>
-        /// <param name="dllPath"></param>
-        /// <param name="propertyChangedMethodName"></param>
-        static void InjectPropertyChanged(MemoryStream assemblyStream)
-        {
-            var assembly = AssemblyDefinition.ReadAssembly(assemblyStream);
-            foreach (var type in assembly.MainModule.Types)
+            Console.WriteLine($"inject Type:{typeDefinition}");
+            foreach (var property in typeDefinition.Properties)
             {
-                Console.WriteLine(type?.Name);
-                foreach (var property in type.Properties)
+                Console.WriteLine($"property:{property}");
+                var hasBindingAttribute = property.HasCustomAttribute(bindingAttributeTypeName);
+                var hasSetMethod = property.SetMethod != null;
+                if (!hasBindingAttribute || !hasSetMethod)
                 {
-                    if (!property.HasCustomAttribute("BindingAttribute") || property.SetMethod == null)
-                    {
-                        continue;
-                    }
-
-                    InjectPropertyChangedMethod(assembly.MainModule, property, propertyChangedMethodName);
+                    continue;
                 }
+
+                Console.WriteLine($"Inject type:{typeDefinition} property:{property} propertyChanged");
+                InjectPropertyChangedMethod(moduleDefinition, property, propertyChangedMethodName);
             }
 
-            assembly.Write(output);//, new WriterParameters { WriteSymbols = true });
             Console.WriteLine($"inject PropertyChanged complete");
         }
 
@@ -47,10 +38,10 @@ namespace FUISourcesGenerator
         /// <param name="module"></param>
         /// <param name="property"></param>
         /// <param name="propertyChangedMethodName"></param>
-        static void InjectPropertyChangedMethod(ModuleDefinition module, PropertyDefinition property, string propertyChangedMethodName)
+        void InjectPropertyChangedMethod(ModuleDefinition module, PropertyDefinition property, string propertyChangedMethodName)
         {
             var flag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
-            var type = Assembly.LoadFrom("").GetType("ObservableObject");
+            var type = Assembly.LoadFrom(fuiPath).GetType(observableObjectTypeName);
             var propertyChangedMethod = module.ImportReference(type.GetMethod(propertyChangedMethodName, flag));
             var injector = new Injector(property.SetMethod, 2);
             injector.InsertAfter(OpCodes.Ldarg_0);

@@ -2,14 +2,12 @@
 {
     public partial class DataBindingContextGenerator
     {
-        const string viewNameMark = "*ViewName*";
-        const string propertyChengedMark = "*PropertyChangedDelegates*";
-        const string bindingMark = "*Binding*";
-        const string unbindingMark = "*Unbinding*";
-        const string onPropertyChangedMark = "*OnPropertyChanged*";
-        const string viewModelTypeMark = "*ViewModelType*";
-        const string viewModelNameMark = "*ViewModelName*";
-        const string propertyChangedCasesMark = "*PropertyChangedCases*";
+        const string ViewNameMark = "*ViewName*";
+        const string BindingMark = "*Binding*";
+        const string UnbindingMark = "*Unbinding*";
+        const string ViewModelTypeMark = "*ViewModelType*";
+        const string ViewModelNameMark = "*ViewModelName*";
+        const string ConvertersMark = "*Converters*";
 
 
         const string Template = @"
@@ -17,14 +15,10 @@ namespace __DataBindingGenerated
 {
     public class __*ViewName*_Binding_Generated : FUI.UGUI.UGUIView
     {
-        public *ViewName*_Binding_Generated(FUI.ViewModel bindingContext, FUI.IAssetLoader assetLoader, string assetPath, string viewName) : base(bindingContext, assetLoader, assetPath, viewName) { }
+*Converters*
+        public __*ViewName*_Binding_Generated(FUI.ViewModel bindingContext, FUI.IAssetLoader assetLoader, string assetPath, string viewName) : base(bindingContext, assetLoader, assetPath, viewName) { }
 
-        public *ViewName*_Binding_Generated(FUI.ViewModel bindingContext, FUI.IAssetLoader assetLoader, UnityEngine.GameObject gameObject, string viewName) : base(bindingContext, assetLoader, gameObject, viewName) { }
-
-        delegate void PropertyChangedDelegate(object value);
-        delegate void PropertyChangedDelegate<T>(T value);
-
-*PropertyChangedDelegates*
+        public __*ViewName*_Binding_Generated(FUI.ViewModel bindingContext, FUI.IAssetLoader assetLoader, UnityEngine.GameObject gameObject, string viewName) : base(bindingContext, assetLoader, gameObject, viewName) { }
 
         public override void Binding(FUI.Bindable.ObservableObject bindingContext)
         {
@@ -40,21 +34,34 @@ namespace __DataBindingGenerated
 
         protected override void OnPropertyChanged(object sender, string propertyName)
         {
-*OnPropertyChanged*
         }
     }
 }
 ";
 
-        const string OnPropertyChangedTemplate = @"
+        const string BindingItemsMark = "*BindingItems*";
+        const string BindingTemplate = @"
             if(BindingContext is *ViewModelType* *ViewModelName*)
             {
-                switch(propertyName)
-                {
-                    *PropertyChangedCases*
-                }
+*BindingItems*
                 return;
             }
+";
+        const string PropertyChangedDelegateMark = "*PropertyChangedDelegate*";
+        const string ConvertMark = "*Convert*";
+        const string ElementTypeMark = "*ElementType*";
+        const string ElementPathMark = "*ElementPath*";
+        const string BindingItemTemplate = @"
+*ViewModelName*.*PropertyChangedDelegate* += (sender, preValue, @value)=>
+{
+    *Convert*
+    var element = GetVisualElement<*ElementType*>(""*ElementPath*"");
+    if(element == null)
+    {
+        throw new System.Exception($""{this.Name} GetVisualElement type:{typeof(*ElementType*)} path:{@""*ElementPath*""} failed""); 
+    }
+    element.SetValue(convertedValue);
+};
 ";
     }
 }

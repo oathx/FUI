@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7454719624523397544}
   - component: {fileID: 6496416245852526025}
   - component: {fileID: 3732678518727497854}
-  - component: {fileID: 3418147616785452386}
+  - component: {fileID: 2320186539149195112}
   m_Layer: 5
   m_Name: img_Icon
   m_TagString: Untagged
@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.49803925, g: 0.83921576, b: 0.9921569, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3418147616785452386
+--- !u!114 &2320186539149195112
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -84,10 +84,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1275802800955062539}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d3dbbffd4a8630478b70391c746a859, type: 3}
+  m_Script: {fileID: 11500000, guid: 7f42249d75e9fce44a9f1a9fe9294421, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  formatString: testIcon{0}
 --- !u!1 &2687979082426007558
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +176,7 @@ GameObject:
   - component: {fileID: 4514246622884191606}
   - component: {fileID: 3312788902416625512}
   - component: {fileID: 6974066762041049799}
-  - component: {fileID: 1971327460938808930}
+  - component: {fileID: 4330722371920411464}
   m_Layer: 5
   m_Name: txt_ID
   m_TagString: Untagged
@@ -245,7 +244,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
---- !u!114 &1971327460938808930
+--- !u!114 &4330722371920411464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -254,7 +253,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3812610544227834680}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19437ae9c3dc034e8bd15a4794661b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 4a4d9b949680d5145961f6e388cfa0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5856590361736841140
@@ -269,7 +268,7 @@ GameObject:
   - component: {fileID: 2984758670039530508}
   - component: {fileID: 8144474055611398139}
   - component: {fileID: 7023030762742847546}
-  - component: {fileID: 8986303211103498014}
+  - component: {fileID: 6901804484569631257}
   m_Layer: 5
   m_Name: btn_submit
   m_TagString: Untagged
@@ -377,7 +376,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &8986303211103498014
+--- !u!114 &6901804484569631257
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -386,7 +385,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5856590361736841140}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c67b45a1d2ef94e4dbd47e0a7f4d2a67, type: 3}
+  m_Script: {fileID: 11500000, guid: db91105092333ce45a9eb8d0b54669a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5930938856053180566
@@ -401,6 +400,7 @@ GameObject:
   - component: {fileID: 3145704663778077795}
   - component: {fileID: 7044993777799422260}
   - component: {fileID: 5146929232749467492}
+  - component: {fileID: 8033806515645708669}
   m_Layer: 5
   m_Name: TestView
   m_TagString: Untagged
@@ -493,6 +493,55 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &8033806515645708669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5930938856053180566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7efd9ea47d38a0844bcfeca4a4e74b73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config:
+    viewName: TestView
+    contexts:
+    - type: FUI.Test.TestViewModel
+      properties:
+      - name: Name
+        type: FUI.Test.Name
+        converterType: FUI.UGUI.ValueConverter.ObjectToStringConverter
+        elementPath: txt_Name
+        elementType: FUI.UGUI.VisualElement.TextElement
+        converterValueType: System.Object
+        converterTargetType: System.String
+        elementValueType: System.String
+      - name: ID
+        type: System.Int32
+        converterType: FUI.UGUI.ValueConverter.IntToStringConverter
+        elementPath: txt_ID
+        elementType: FUI.UGUI.VisualElement.TextElement
+        converterValueType: System.Int32
+        converterTargetType: System.String
+        elementValueType: System.String
+      - name: Age
+        type: System.Int32
+        converterType: FUI.UGUI.ValueConverter.IntToStringConverter
+        elementPath: txt_Age
+        elementType: FUI.UGUI.VisualElement.TextElement
+        converterValueType: System.Int32
+        converterTargetType: System.String
+        elementValueType: System.String
+      - name: Submit
+        type: System.Action
+        converterType: 
+        elementPath: btn_submit
+        elementType: FUI.UGUI.VisualElement.ButtonEventElement
+        converterValueType: 
+        converterTargetType: 
+        elementValueType: System.Action
 --- !u!1 &6763514268983137578
 GameObject:
   m_ObjectHideFlags: 0
@@ -578,7 +627,7 @@ GameObject:
   - component: {fileID: 1586468865239673850}
   - component: {fileID: 8204756082225896594}
   - component: {fileID: 1248791572162555066}
-  - component: {fileID: 8757552551284479314}
+  - component: {fileID: 8492808703313037219}
   m_Layer: 5
   m_Name: txt_Age
   m_TagString: Untagged
@@ -646,7 +695,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
---- !u!114 &8757552551284479314
+--- !u!114 &8492808703313037219
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -655,7 +704,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8201306822088104231}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19437ae9c3dc034e8bd15a4794661b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 4a4d9b949680d5145961f6e388cfa0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &9132235640334921787
@@ -669,7 +718,7 @@ GameObject:
   - component: {fileID: 3865576125746401470}
   - component: {fileID: 7837418372863900983}
   - component: {fileID: 5286834136830635927}
-  - component: {fileID: 5010143695133029567}
+  - component: {fileID: 8699630960319512571}
   m_Layer: 5
   m_Name: txt_Name
   m_TagString: Untagged
@@ -737,7 +786,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
---- !u!114 &5010143695133029567
+--- !u!114 &8699630960319512571
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -746,6 +795,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 9132235640334921787}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a82a5092d7126e340aeaac316c3a136d, type: 3}
+  m_Script: {fileID: 11500000, guid: 4a4d9b949680d5145961f6e388cfa0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

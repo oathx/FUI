@@ -12,6 +12,7 @@ namespace FUISourcesGenerator
     internal class Generator
     {
         public List<ITypeSyntaxNodeSourcesGenerator> typeSyntaxRootGenerators = new List<ITypeSyntaxNodeSourcesGenerator>();
+        public List<ITypeSyntaxNodeModifier> typeSyntaxModifiers = new List<ITypeSyntaxNodeModifier>();
         public List<ITypeDefinationSourcesGenerator> typeDefinationSourcesGenerators = new List<ITypeDefinationSourcesGenerator>();
         public List<IBeforeCompilerSourcesGenerator> beforeCompilerSourcesGenerators = new List<IBeforeCompilerSourcesGenerator>();
         public List<ITypeDefinationInjector> typeDefinationInjectors = new List<ITypeDefinationInjector>();
@@ -41,6 +42,7 @@ namespace FUISourcesGenerator
                     }
                 }
             }
+            List<(DocumentId remove, Document add)> temp = new List<(DocumentId remove, Document add)>();
             foreach(var document in project.Documents)
             {
                 Console.WriteLine(document.Name);
@@ -50,8 +52,24 @@ namespace FUISourcesGenerator
                     continue;
                 }
 
+                //修改类型语法树
+                if(typeSyntaxModifiers.Count != 0)
+                {
+                    foreach (var typeModifier in typeSyntaxModifiers)
+                    {
+                        root = typeModifier.Modify(root);
+                    }
+                    var newDocument = document.WithSyntaxRoot(root);
+                    temp.Add((document.Id, newDocument));
+                }
+                
                 //根据类型语法树生成代码
                 typeSyntaxRootGenerators.ForEach((item)=>AddSources(item.Generate(root)));
+            }
+
+            foreach(var item in temp)
+            {
+                project = project.RemoveDocument(item.remove).AddDocument(item.add.Name, item.add.GetTextAsync().Result).Project;
             }
 
             //根据类型定义生成代码
@@ -70,7 +88,7 @@ namespace FUISourcesGenerator
             //注入代码
             foreach (var add in addition)
             {
-                project.AddAdditionalDocument(add.name, add.Text);
+                project = project.AddDocument(add.name, CSharpSyntaxTree.ParseText(add.Text).GetRoot()).Project; 
             }
 
             var result = await Compiler(project);
@@ -88,6 +106,7 @@ namespace FUISourcesGenerator
 
             //输出文件
             result.Write(output);
+            Console.WriteLine($"compiler complete at:{output}");
         }
 
         async Task<AssemblyDefinition> Compiler(Project project)
@@ -111,43 +130,6 @@ namespace FUISourcesGenerator
             return AssemblyDefinition.ReadAssembly(ms);
         }
 
-        public async void Generate(string output, string solutionPath, string projectName)
-        {
-            var workspace = MSBuildWorkspace.Create();
-            var solution = await workspace.OpenSolutionAsync(solutionPath);
-            var project = solution.Projects.FirstOrDefault(item => item.Name == projectName);
-            foreach(var document in project.Documents)
-            {
-                var root = await document.GetSyntaxRootAsync();
-                ReplaceViewModelToPublicAndPartial(root);
-            }
-        }
-
-        void ReplaceViewModelToPublicAndPartial(SyntaxNode root)
-        {
-            var classDeclarations = root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToArray();
-            foreach(var classDeclaration in classDeclarations)
-            {
-                if(!HasBaseClass(classDeclaration, "ViewModel"))
-                {
-                    continue;
-                }
-
-                var partialModifier = SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithAdditionalAnnotations(Formatter.Annotation);
-                var newNode = classDeclaration.AddModifiers(partialModifier);
-                root.ReplaceNode(classDeclaration, newNode);
-            }
-        }
-
-        bool HasBaseClass(ClassDeclarationSyntax classDeclatation, string baseClassName)
-        {
-            if(classDeclatation.BaseList == null)
-            {
-                return false;
-            }
-
-            return classDeclatation.BaseList.Types.FirstOrDefault(item => item.ToString() == baseClassName) != null;
-        }
 
         void ReplaceFieldToBindableProperty(SyntaxNode root)
         {

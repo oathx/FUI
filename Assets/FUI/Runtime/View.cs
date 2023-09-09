@@ -2,40 +2,44 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace FUI
 {
     public abstract class View
     {
         #region 视觉元素查找键
-        struct ElementKey
+        readonly struct ElementKey : IEquatable<ElementKey>
         {
-            public readonly string elementName;
+            public readonly string elementPath;
             public readonly string elementType;
 
-            public ElementKey(string elementName, string elementType)
+            public ElementKey(string elementPath, string elementType)
             {
-                this.elementName = elementName;
+                this.elementPath = elementPath;
                 this.elementType = elementType;
             }
 
-            public ElementKey(string elementName, Type elementType)
+            public ElementKey(string elementPath, Type elementType)
             {
-                this.elementName = elementName;
+                this.elementPath = elementPath;
                 this.elementType = elementType.FullName;
             }
 
-            public bool IsEmpty => elementName == null && elementType == null;
+            public bool IsEmpty => elementPath == null && elementType == null;
+
+            public bool Equals(ElementKey other)
+            {
+                return elementPath == other.elementPath && elementType == other.elementType;
+            }
 
             public override int GetHashCode()
             {
-                return elementName.GetHashCode() ^ elementType.GetHashCode();
+                return elementPath.GetHashCode() ^ elementType.GetHashCode();
             }
 
             public override string ToString()
             {
-                return $"name:{elementName} type:{elementType}";
+                return $"name:{elementPath} type:{elementType}";
             }
         }
         #endregion

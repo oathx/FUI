@@ -4,29 +4,9 @@ using System.Text;
 
 namespace FUISourcesGenerator
 {
-    public class BindingProperty
-    {
-        public string name;
-        public string type;
-        public string elementPath;
-        public string elementType;
-    }
-
-    public class BindingContext
-    {
-        public string type;
-        public List<BindingProperty> properties;
-    }
-
-    public class BindingConfig
-    {
-        public string viewName;
-        public List<BindingContext> bindingContexts;
-        public BindingContext defaultContext;
-    }
     public partial class DataBindingContextGenerator : IBeforeCompilerSourcesGenerator
     {
-        const string configPath = "./UIBindingConfig";
+        const string configPath = ".././UIBindingConfig";
         const string configExtension = ".binding";
 
         Source?[] IBeforeCompilerSourcesGenerator.Generate()
@@ -35,55 +15,89 @@ namespace FUISourcesGenerator
             foreach (var file in Directory.GetFiles(configPath, $"*{configExtension}"))
             {
                 var config = JsonConvert.DeserializeObject<BindingConfig>(File.ReadAllText(file));
-                var code = Template.Replace(viewNameMark, config.viewName);
+                var code = Template.Replace(ViewNameMark, config.viewName);
 
-                HashSet<string> propertyChangedNames = new HashSet<string>();
-                //生成一个context的属性变化委托
-                var onPropertyChangedBuilder = new StringBuilder();
-                foreach (var bindingContext in config.bindingContexts)
+                var bindingBuilder = new StringBuilder();
+                HashSet<string> converterTypes = new HashSet<string>();
+                HashSet<string> propertyDelegates = new HashSet<string>();
+                foreach (var bindingContext in config.contexts)
                 {
-                    var contextPropertyChanged = OnPropertyChangedTemplate.Replace(viewModelTypeMark, GetFormattedType(bindingContext.type));
-                    contextPropertyChanged = contextPropertyChanged.Replace(viewModelNameMark, GetTypeShortName(bindingContext.type));
-                    var contextBuilder = new StringBuilder();
-                    foreach (var property in bindingContext.properties)
+                    var bindingItemsBuilder = new StringBuilder();
+                    var vmName = GetFormattedType(bindingContext.type);
+                    
+                    foreach(var property in bindingContext.properties)
                     {
-                        var delegateName = $"{property.name}_{GetFormattedType(property.type)}_Delegate";
-                        propertyChangedNames.Add(delegateName);
-                        contextBuilder.AppendLine($"case @\"{property.name}\": {delegateName}?.Invoke({GetTypeShortName(bindingContext.type)}.{property.name}) break;");
+                        var delegateName = Utility.GetPropertyChangedDelegateName(property.name);
+                        propertyDelegates.Add(delegateName);
+
+                        var propertyItem = BindingItemTemplate.Replace(PropertyChangedDelegateMark, delegateName);
+                        propertyItem = propertyItem.Replace(ViewModelNameMark, vmName);
+                        var convert = BuildConvert(bindingContext.type, property);
+                        propertyItem = propertyItem.Replace(ConvertMark, convert);
+                        propertyItem = propertyItem.Replace(ElementTypeMark, property.elementType);
+                        propertyItem = propertyItem.Replace(ElementPathMark, property.elementPath);
+                        bindingItemsBuilder.AppendLine(propertyItem);
+
+                        converterTypes.Add(property.converterType);
                     }
-                    contextPropertyChanged = contextPropertyChanged.Replace(propertyChangedCasesMark, contextBuilder.ToString());
-                    onPropertyChangedBuilder.Append(contextPropertyChanged);
+                    var bindingItem = BindingTemplate.Replace(ViewModelTypeMark, bindingContext.type);
+                    bindingItem = bindingItem.Replace(ViewModelNameMark, vmName);
+                    bindingItem = bindingItem.Replace(BindingItemsMark, bindingItemsBuilder.ToString());
+                    bindingBuilder.AppendLine(bindingItem);
                 }
+                code = code.Replace(BindingMark, bindingBuilder.ToString());
 
-                //生成默认context的属性变化委托
-                var defaultPropertyChanged = OnPropertyChangedTemplate.Replace(viewModelTypeMark, "FUI.ViewModel");
-                defaultPropertyChanged = defaultPropertyChanged.Replace(viewModelNameMark, "context");
-                var defaultContextBuilder = new StringBuilder();
-                foreach(var property in config.defaultContext.properties)
+                var convertersBuilder = new StringBuilder();
+                foreach (var converterType in converterTypes)
                 {
-                    var delegateName = $"{property.name}_{GetFormattedType(property.type)}_Delegate";
-                    propertyChangedNames.Add(delegateName);
-                    defaultContextBuilder.AppendLine($"case @\"{property.name}\": {delegateName}?.Invoke(context.GetProperty<{property.type}>(@\"{property.name}\")) break;");
+                    if (string.IsNullOrEmpty(converterType))
+                    {
+                        continue;
+                    }
+                    convertersBuilder.AppendLine($"{converterType} {GetFormattedType(converterType)} = new {converterType}();");
                 }
+                code = code.Replace(ConvertersMark, convertersBuilder.ToString());
 
-                onPropertyChangedBuilder.Append(defaultPropertyChanged);
+                var unbindingBuilder = new StringBuilder();
+                foreach (var propertyDelegate in propertyDelegates)
+                {
+                    unbindingBuilder.AppendLine($"{propertyDelegate} = null;");
+                }
+                code = code.Replace(UnbindingMark, string.Empty); // unbindingBuilder.ToString());
 
-                code.Replace(onPropertyChangedMark, onPropertyChangedBuilder.ToString());
+                code = Utility.NormalizeCode(code);
                 Console.WriteLine(code);
-                //result.Add(new Source($"{config.viewName}.DataBinding", code));
+                result.Add(new Source($"{config.viewName}.DataBinding", code));
             }
 
             return result.ToArray();
         }
 
+        string BuildConvert(string viewModelType, BindingProperty property)
+        {
+            var convertBuilder = new StringBuilder();
+            var elementValueType = Utility.GetGenericTypeName(property.elementValueType);
+            if (string.IsNullOrEmpty(property.converterType))
+            {
+                convertBuilder.AppendLine($"if(!(@value is {elementValueType} convertedValue))");
+                convertBuilder.AppendLine("{");
+                convertBuilder.AppendLine($"throw new System.Exception(\"{viewModelType}.{property.name} can not convert to {property.elementValueType} property:{property.type} element:{property.elementType} elementValueType:{property.elementValueType}\");");
+                convertBuilder.AppendLine("}");
+            }
+            else
+            {
+                convertBuilder.AppendLine($"var convertedTempValue = {GetFormattedType(property.converterType)}.Convert(@value);");
+                convertBuilder.AppendLine($"if(!(convertedTempValue is {elementValueType} convertedValue))");
+                convertBuilder.AppendLine("{");
+                convertBuilder.AppendLine($"throw new System.Exception(\"{viewModelType}.{property.name} can not convert to {property.elementValueType} property:{property.type} converter:{property.converterType}({property.type},{property.converterTargetType}) element:{property.elementType}({property.elementValueType})\");");
+                convertBuilder.AppendLine("}");
+            }
+            return convertBuilder.ToString();
+        }
+
         static string GetFormattedType(string type)
         {
             return type.Replace(".", "_");
-        }
-
-        static string GetTypeShortName(string type)
-        {
-            return type.Split('.').Last();
         }
     }
 }

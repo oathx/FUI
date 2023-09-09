@@ -2,11 +2,11 @@
 {
     public interface IVisualElement<TValue>
     {
-        void OnValueChanged(TValue value);
+        void SetValue(TValue value);
     }
 
     public interface IVisualElement
     {
-        void OnValueChanged(object value);
+        void SetValue(object value);
     }
 }

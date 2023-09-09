@@ -31,6 +31,14 @@ namespace FUISourcesGenerator
     }
 
     /// <summary>
+    /// 类型语法树修改器
+    /// </summary>
+    internal interface ITypeSyntaxNodeModifier
+    {
+         SyntaxNode Modify(SyntaxNode root);
+    }
+
+    /// <summary>
     /// 根据类型定义生成代码
     /// </summary>
     internal interface ITypeDefinationSourcesGenerator

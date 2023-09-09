@@ -2,6 +2,7 @@
 using FUI.Bindable;
 
 using System;
+using System.Collections.Generic;
 
 namespace FUI.Test
 {
@@ -26,10 +27,26 @@ namespace FUI.Test
 
     [Binding("TestView")]
     [Binding("TestView1")]
-    public class TestViewModel : ViewModel
+    public partial class TestViewModel : ViewModel
     {
+        public Name _name;
         [Binding]
-        public Name Name { get; set; }
+        public Name Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if(EqualityComparer<Name>.Default.Equals(_name, value))
+                {
+                    return;
+                }
+                this._Name_Changed?.Invoke(this, _name, value);
+                _name = value;
+            }
+        }
 
         [Binding]
         public int ID { get; set; }

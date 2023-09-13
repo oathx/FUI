@@ -1,27 +1,17 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-using System.Reflection;
-using System.Runtime.Intrinsics.Arm;
-
-using static System.Net.Mime.MediaTypeNames;
-
 namespace FUISourcesGenerator
 {
     public class PropertyChangedInjector : ITypeDefinationInjector
     {
-        const string observableObjectTypeName = "FUI.Bindable.ObservableObject";
-        const string propertyChangedMethodName = "OnPropertyChanged";
-        const string bindingAttributeTypeName = "FUI.BindingAttribute";
-        const string fuiPath = "../../../../../../Library/ScriptAssemblies/FUI.Runtime.dll";
-
         void ITypeDefinationInjector.Inject(Mono.Cecil.ModuleDefinition moduleDefinition, Mono.Cecil.TypeDefinition typeDefinition)
         {
             Console.WriteLine($"inject Type:{typeDefinition}");
             foreach (var property in typeDefinition.Properties)
             {
                 Console.WriteLine($"property:{property}");
-                var hasBindingAttribute = property.HasCustomAttribute(bindingAttributeTypeName);
+                var hasBindingAttribute = property.HasCustomAttribute("FUI.ObservablePropertyAttribute");
                 var hasSetMethod = property.SetMethod != null;
                 if (!hasBindingAttribute || !hasSetMethod)
                 {
@@ -29,7 +19,7 @@ namespace FUISourcesGenerator
                 }
 
                 Console.WriteLine($"Inject type:{typeDefinition} property:{property} propertyChanged");
-                InjectPropertyChangedMethod(moduleDefinition, property, propertyChangedMethodName);
+                InjectPropertyChangedMethod(moduleDefinition, typeDefinition, property);
             }
 
             Console.WriteLine($"inject PropertyChanged complete");
@@ -41,60 +31,38 @@ namespace FUISourcesGenerator
         /// <param name="module"></param>
         /// <param name="property"></param>
         /// <param name="propertyChangedMethodName"></param>
-        void InjectPropertyChangedMethod(ModuleDefinition module, PropertyDefinition property, string propertyChangedMethodName)
+        void InjectPropertyChangedMethod(ModuleDefinition module, TypeDefinition type, PropertyDefinition property)
         {
-        //before
-            //// <ID>k__BackingField = value;
-            //IL_0000: ldarg.0
-            //IL_0001: ldarg.1
-            //IL_0002: stfld int32 FUI.Test.TestViewModel::'<ID>k__BackingField'
-            //// }
-            //IL_0007: ret
+            property.SetMethod.Body.Instructions.Clear();
+            var processor = property.SetMethod.Body.GetILProcessor();
 
-        //after
-            //// {
-            //IL_0000: nop
-            //// if (!EqualityComparer<Name>.Default.Equals(_name, value))
-            //IL_0001: call class [netstandard] System.Collections.Generic.EqualityComparer`1<!0> class [netstandard] System.Collections.Generic.EqualityComparer`1<class FUI.Test.Name>::get_Default()
-            //IL_0006: ldarg.0
-            //IL_0007: ldfld class FUI.Test.Name FUI.Test.TestViewModel::_name
-            //IL_000c: ldarg.1
-            //IL_000d: callvirt instance bool class [netstandard] System.Collections.Generic.EqualityComparer`1<class FUI.Test.Name>::Equals(!0, !0)
-            //IL_0012: stloc.0
-            //// (no C# code)
-            //IL_0013: ldloc.0
-            //IL_0014: brfalse.s IL_0019
-            //// }
-            //IL_0016: nop
-            //IL_0017: br.s IL_003a
-            //// _Name_Changed?.Invoke(this, _name, value);
-            //IL_0019: ldarg.0
-            //IL_001a: ldfld class [FUI.Runtime] FUI.Bindable.PropertyChangedHandler`1<class FUI.Test.Name> FUI.Test.TestViewModel::_Name_Changed
-            //IL_001f: dup
-            //IL_0020: brtrue.s IL_0025
-            //// (no C# code)
-            //IL_0022: pop
-            //IL_0023: br.s IL_0033
-            //IL_0025: ldarg.0
-            //IL_0026: ldarg.0
-            //IL_0027: ldfld class FUI.Test.Name FUI.Test.TestViewModel::_name
-            //IL_002c: ldarg.1
-            //IL_002d: callvirt instance void class [FUI.Runtime] FUI.Bindable.PropertyChangedHandler`1<class FUI.Test.Name>::Invoke(object, !0, !0)
-            //// _name = value;
-            //IL_0032: nop
-            //IL_0033: ldarg.0
-            //IL_0034: ldarg.1
-            //IL_0035: stfld class FUI.Test.Name FUI.Test.TestViewModel::_name
-            //// (no C# code)
-            //IL_003a: ret
-            var flag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
-            var type = Assembly.LoadFrom(fuiPath).GetType(observableObjectTypeName);
-            var propertyChangedMethod = module.ImportReference(type.GetMethod(propertyChangedMethodName, flag));
-            var injector = new Injector(property.SetMethod, 2);
-            injector.InsertAfter(OpCodes.Ldarg_0);
-            injector.InsertAfter(OpCodes.Ldstr, property.Name);
-            injector.InsertAfter(OpCodes.Call, propertyChangedMethod);
-            injector.OffsetMethod();
+            var ret = processor.Create(OpCodes.Ret);
+            var callChangedNop = processor.Create(OpCodes.Nop);
+            var changedIsNullNop = processor.Create(OpCodes.Nop);   
+
+            // _Name_Changed?.Invoke(this, _name, value);
+            processor.Append(processor.Create(OpCodes.Ldarg_0));
+            var propertyChangedField = type.GetField($"_{property.Name}_Changed");
+            processor.Append(processor.Create(OpCodes.Ldfld, propertyChangedField));
+            processor.Append(processor.Create(OpCodes.Dup));
+            processor.Append(processor.Create(OpCodes.Brtrue_S, callChangedNop));
+            processor.Append(processor.Create(OpCodes.Pop));
+            processor.Append(processor.Create(OpCodes.Br_S, changedIsNullNop));
+
+            processor.Append(callChangedNop);
+            processor.Append(processor.Create(OpCodes.Ldarg_0));
+            processor.Append(processor.Create(OpCodes.Ldarg_0));
+            var field = module.ImportReference(type.GetField($"<{property.Name}>k__BackingField"));
+            processor.Append(processor.Create(OpCodes.Ldfld, field));
+            processor.Append(processor.Create(OpCodes.Ldarg_1));
+            processor.Append(processor.Create(OpCodes.Callvirt, propertyChangedField.FieldType.Resolve().GetMethod("Invoke")));
+
+            // _name = value;
+            processor.Append(changedIsNullNop);
+            processor.Append(processor.Create(OpCodes.Ldarg_0));
+            processor.Append(processor.Create(OpCodes.Ldarg_1));
+            processor.Append(processor.Create(OpCodes.Stfld, field));
+            processor.Append(ret);
         }
     }
 }

@@ -1,28 +1,30 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
 
 namespace FUISourcesGenerator
 {
-    internal class ViewModelModifier : ITypeSyntaxNodeModifier
+    /// <summary>
+    /// 关键字修改
+    /// </summary>
+    internal class KeywordModifier : ITypeSyntaxNodeModifier
     {
         public SyntaxNode Modify(SyntaxNode root)
         {
-            return ReplaceViewModelToPublicAndPartial(root);
+            return ReplaceKeywordToPublicAndPartial(root);
         }
 
         /// <summary>
-        /// 将所有拥有Binding这个特性的类更改为public partial class
+        /// 将所有拥有ObserableObject这个特性的类更改为public partial class
         /// </summary>
         /// <param name="root"></param>
         /// <returns></returns>
-        SyntaxNode ReplaceViewModelToPublicAndPartial(SyntaxNode root)
+        SyntaxNode ReplaceKeywordToPublicAndPartial(SyntaxNode root)
         {
             var classDeclarations = root.DescendantNodes().OfType<ClassDeclarationSyntax>().ToArray();
             foreach (var classDeclaration in classDeclarations)
             {
-                if (!IsBindable(classDeclaration))
+                if (!Utility.HasObservableObjectAttribute(classDeclaration))
                 {
                     continue;
                 }
@@ -42,31 +44,6 @@ namespace FUISourcesGenerator
             }
             
             return root;
-        }
-
-        bool IsBindable(ClassDeclarationSyntax classDeclaration)
-        {
-            var classAttributes = classDeclaration.AttributeLists.ToList();
-            
-            foreach(var att in classAttributes)
-            {
-                foreach(var node in att.ChildNodes().OfType<AttributeSyntax>())
-                {
-                    foreach(var id in node.ChildNodes().OfType<IdentifierNameSyntax>())
-                    {
-                        if (id.ToString() == "Binding" 
-                            || id.ToString() == "BindingAttribute" 
-                            || id.ToString() == "FUI.Bindable.BindingAttribute" 
-                            || id.ToString() == "Bindable.BindingAttribute" 
-                            || id.ToString() == "FUI.Bindable.Binding" 
-                            || id.ToString() == "Bindable.Binding")
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
         }
     }
 }

@@ -16,6 +16,17 @@ namespace FUISourcesGenerator
         }
 
         /// <summary>
+        /// 获取一个字段定义
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public static FieldDefinition GetField(this TypeDefinition type, string fieldName)
+        {
+            return type.Fields.FirstOrDefault(p => p.Name == fieldName);
+        }
+
+        /// <summary>
         /// 从程序集定义中获取一个类型定义
         /// </summary>
         /// <param name="assembly">程序集定义</param>

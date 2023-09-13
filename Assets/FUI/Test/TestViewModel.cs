@@ -15,49 +15,33 @@ namespace FUI.Test
         {
             return $"{lastName} {firstName}";
         }
-    } 
+    }
 
+    [ObservableObject]
     public class ItemData : ObservableObject
     {
-        [Binding]
+        [ObservableProperty]
         public int ID { get; set; }
-        [Binding]
+        [ObservableProperty]
         public string Name { get; set; }
     }
 
-    [Binding("TestView")]
-    [Binding("TestView1")]
+    [ObservableObject]
     public partial class TestViewModel : ViewModel
     {
-        public Name _name;
-        [Binding]
-        public Name Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                if(EqualityComparer<Name>.Default.Equals(_name, value))
-                {
-                    return;
-                }
-                this._Name_Changed?.Invoke(this, _name, value);
-                _name = value;
-            }
-        }
+        [ObservableProperty]
+        public Name Name { get; set; }
 
-        [Binding]
+        [ObservableProperty]
         public int ID { get; set; }
 
-        [Binding]
+        [ObservableProperty]
         public int Age { get; set; }
 
-        [Binding]
+        [ObservableProperty]
         public Action Submit { get; set; }
 
-        [Binding]
+        [ObservableProperty]
         public ObservableList<ItemData> List { get; set; }
 
         //public override void Initialize()

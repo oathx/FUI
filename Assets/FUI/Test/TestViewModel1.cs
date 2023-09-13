@@ -1,9 +1,6 @@
-﻿
-using System;
-
-namespace FUI.Test
+﻿namespace FUI.Test
 {
-    [Binding("TestView")]
+    [ObservableObject]
     public class TestViewModel1 : TestViewModel
     {
         //public override void Initialize()
